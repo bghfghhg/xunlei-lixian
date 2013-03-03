@@ -136,7 +136,7 @@ Options:
  --input=[file]    -i            Download URLs found in file.
  --output=[file]   -o            Download task to file.
  --output-dir=[dir]              Download task to dir.
- --tool=[wget|asyn|aria2|curl]   Choose download tool.
+ --tool=[wget|asyn|aria2|curl|lftp]   Choose download tool.
                                  Default: wget
  --continue        -c            Continue downloading a partially downloaded file.
                                  Default: false.

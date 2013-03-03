@@ -33,6 +33,20 @@ def wget_download(client, download_url, filename, resuming=False):
 	if exit_code != 0:
 		raise Exception('wget exited abnormaly')
 
+def lftp_download(client, download_url, filename, resuming=False):
+	gdriveid = str(client.get_gdriveid())
+	rc = 'set http:cookie "gdriveid=%s"\n' % gdriveid
+	path = os.path.join(os.environ.get('HOME'), '.lftprc')
+	if not os.path.exists(path) or gdriveid not in open(path).read():
+		with open(path, 'a') as f:
+			f.write(rc)
+	cmd = 'pget -n 10 -c "%s" -o "%s"' % (download_url, filename)
+	lftp_opts = ['lftp', '-c', cmd]
+	check_bin(lftp_opts[0])
+	exit_code = subprocess.call(lftp_opts)
+	if exit_code != 0:
+		raise Exception('lftp exited abnormaly')
+	
 def curl_download(client, download_url, filename, resuming=False):
 	gdriveid = str(client.get_gdriveid())
 	curl_opts = ['curl', '-L', download_url, '--cookie', 'gdriveid='+gdriveid, '--output', filename]
@@ -59,6 +73,8 @@ def aria2_download(client, download_url, path, resuming=False):
 	if exit_code != 0:
 		raise Exception('aria2c exited abnormaly')
 
+aria2c_download = aria2_download
+
 def axel_download(client, download_url, path, resuming=False):
 	gdriveid = str(client.get_gdriveid())
 	axel_opts = ['axel', '--header=Cookie: gdriveid='+gdriveid, download_url, '--output', path]
@@ -72,6 +88,4 @@ def axel_download(client, download_url, path, resuming=False):
 
 
 def get_tool(name):
-	return {'wget':wget_download, 'curl': curl_download, 'aria2':aria2_download, 'aria2c':aria2_download, 'axel':axel_download, 'asyn':asyn_download, 'urllib2':urllib2_download}[name]
-
-
+	return globals()[name + '_download']
